@@ -11,12 +11,54 @@ type Session = {
   nickname: string;
 };
 
-function App() {
-  const [screen, setScreen] = useState<Screen>('entry');
-  const [session, setSession] = useState<Session | null>(null);
+const SESSION_KEY = 'dominofighter_session';
 
-  const handleJoinRoom = (roomId: string, playerId: string, nickname: string) => {
-    setSession({ roomId, playerId, nickname });
+function loadSession(): Session | null {
+  try {
+    const saved = localStorage.getItem(SESSION_KEY);
+
+    if (!saved) {
+      return null;
+    }
+
+    const session = JSON.parse(saved) as Session;
+
+    if (
+      typeof session.roomId !== 'string' ||
+      typeof session.playerId !== 'string' ||
+      typeof session.nickname !== 'string'
+    ) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+
+    return session;
+  } catch {
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+}
+
+function App() {
+  const [session, setSession] = useState<Session | null>(() => loadSession());
+  const [screen, setScreen] = useState<Screen>(() =>
+    loadSession() ? 'lobby' : 'entry'
+  );
+
+  const handleJoinRoom = (
+    roomId: string,
+    playerId: string,
+    nickname: string
+  ) => {
+    const newSession: Session = {
+      roomId,
+      playerId,
+      nickname,
+    };
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
+
+    setSession(newSession);
     setScreen('lobby');
   };
 
@@ -25,6 +67,7 @@ function App() {
   };
 
   const handleLeave = () => {
+    localStorage.removeItem(SESSION_KEY);
     setSession(null);
     setScreen('entry');
   };
