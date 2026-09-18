@@ -1,4 +1,4 @@
-import type { Tile, GameMode, GameState, HandResult } from './types';
+import type { Tile, GameMode, GameState } from './types';
 import { tileValue, isDouble } from './tiles';
 
 export function handTotal(tiles: Tile[]): number {
@@ -99,7 +99,6 @@ export function scoreTranque(
       winnerId = tranquerId;
     }
 
-    const winnerTeam = getTeamForPlayer(state, winnerId);
     let total = 0;
     for (const pid of active) {
       total += handTotal(state.hands[pid]);

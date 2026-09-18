@@ -1,5 +1,5 @@
 import type { Tile, GameMode, GameState } from './types';
-import { isDouble, tileValue, highestSide } from './tiles';
+import { tileValue, highestSide } from './tiles';
 
 export type LegalMove = {
   tileId: string;
@@ -29,10 +29,6 @@ export function getLegalMoves(hand: Tile[], leftEnd: number | null, rightEnd: nu
 
 export function hasLegalMove(hand: Tile[], leftEnd: number | null, rightEnd: number | null): boolean {
   return getLegalMoves(hand, leftEnd, rightEnd).length > 0;
-}
-
-export function canPlayOnEnd(tile: Tile, end: number): boolean {
-  return tile.a === end || tile.b === end;
 }
 
 export type StartingPlayerResult = {

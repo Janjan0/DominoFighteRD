@@ -38,7 +38,6 @@ function App() {
       <Lobby
         roomId={session.roomId}
         playerId={session.playerId}
-        nickname={session.nickname}
         onGameStart={handleGameStart}
         onLeave={handleLeave}
       />
@@ -49,7 +48,6 @@ function App() {
     <GameTable
       roomId={session.roomId}
       playerId={session.playerId}
-      nickname={session.nickname}
       onLeave={handleLeave}
     />
   );

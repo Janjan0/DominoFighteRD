@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Swords, LogIn, Plus, Search, Copy, Users, Eye, Volume2, VolumeX, Crown, Play, ArrowRight } from 'lucide-react';
+import { Swords, LogIn, Plus, Search, Users, Eye, Volume2, VolumeX, ArrowRight } from 'lucide-react';
 import { apiCall } from '@/lib/api';
-import { supabase } from '@/lib/supabase';
 
 type EntryScreenProps = {
   onJoinRoom: (roomId: string, playerId: string, nickname: string) => void;
@@ -61,8 +60,8 @@ export default function EntryScreen({ onJoinRoom }: EntryScreenProps) {
         name: roomName.trim(),
       });
       onJoinRoom(data.room.id, playerId, nickname.trim());
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al crear mesa');
     } finally {
       setLoading(false);
     }
@@ -87,8 +86,8 @@ export default function EntryScreen({ onJoinRoom }: EntryScreenProps) {
         code: joinCode.trim().toUpperCase(),
       });
       onJoinRoom(data.room.id, playerId, nickname.trim());
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al unirse');
     } finally {
       setLoading(false);
     }
@@ -168,7 +167,7 @@ export default function EntryScreen({ onJoinRoom }: EntryScreenProps) {
               ].map((m) => (
                 <button
                   key={m.v}
-                  onClick={() => setMode(m.v as any)}
+                  onClick={() => setMode(m.v as '2v2' | '1v1' | 'pintintin' | '4individual')}
                   className={`p-3 rounded-lg text-sm font-semibold transition-all ${
                     mode === m.v
                       ? 'bg-amber-500 text-emerald-950'

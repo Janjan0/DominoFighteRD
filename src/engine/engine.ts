@@ -4,7 +4,6 @@ import {
   dealTiles,
   getTileById,
   removeTile,
-  tileValue,
 } from './tiles';
 import {
   getLegalMoves,
@@ -13,17 +12,13 @@ import {
   getNextPlayer,
   isTranque,
   isVueltaRedonda,
-  canPlayOnEnd,
-  type LegalMove,
 } from './rules';
 import {
-  handTotal,
   scoreNormalWin,
   scoreTranque,
   isCapicua,
   bonusForTarget,
   canApplyBonus,
-  checkSalidaBonus,
   getTeamForPlayer,
   getActivePlayers,
 } from './scoring';
@@ -184,7 +179,7 @@ export function playTile(
     chosenEnd = 'left';
   }
 
-  let newChain = [...state.chain];
+  const newChain = [...state.chain];
   let newLeftEnd = state.leftEnd;
   let newRightEnd = state.rightEnd;
 

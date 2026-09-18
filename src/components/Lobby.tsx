@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Copy, Crown, Play, Users, Eye, Volume2, VolumeX, LogOut, Search } from 'lucide-react';
+import { Copy, Crown, Play, Users, Eye, Volume2, VolumeX, LogOut } from 'lucide-react';
 import { apiCall } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 
@@ -29,7 +29,6 @@ type Room = {
 type LobbyProps = {
   roomId: string;
   playerId: string;
-  nickname: string;
   onGameStart: () => void;
   onLeave: () => void;
 };
@@ -48,7 +47,7 @@ const MODE_SEATS: Record<string, number> = {
   '4individual': 4,
 };
 
-export default function Lobby({ roomId, playerId, nickname, onGameStart, onLeave }: LobbyProps) {
+export default function Lobby({ roomId, playerId, onGameStart, onLeave }: LobbyProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,8 +80,8 @@ export default function Lobby({ roomId, playerId, nickname, onGameStart, onLeave
     try {
       await apiCall({ action: 'start_game', roomId, playerId });
       onGameStart();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al iniciar');
     } finally {
       setLoading(false);
     }

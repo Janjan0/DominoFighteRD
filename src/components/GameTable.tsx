@@ -49,7 +49,6 @@ type Player = {
 type GameTableProps = {
   roomId: string;
   playerId: string;
-  nickname: string;
   onLeave: () => void;
 };
 
@@ -60,10 +59,9 @@ const MODE_LABELS: Record<string, string> = {
   '4individual': '4 Indiv.',
 };
 
-export default function GameTable({ roomId, playerId, nickname, onLeave }: GameTableProps) {
+export default function GameTable({ roomId, playerId, onLeave }: GameTableProps) {
   const [state, setState] = useState<VisibleState | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [room, setRoom] = useState<any>(null);
   const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,8 +76,7 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
       const data = await apiCall({ action: 'get_state', roomId, playerId });
       setState(data.gameState);
       setPlayers(data.players || []);
-      setRoom(data.room);
-    } catch (e) {
+    } catch {
       // ignore polling errors
     }
   }, [roomId, playerId, lastFetch]);
@@ -128,8 +125,8 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
       await apiCall({ action: 'play_tile', roomId, playerId, tileId: tile.id, end });
       setSelectedTile(null);
       await fetchState();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al jugar');
     } finally {
       setLoading(false);
     }
@@ -141,8 +138,8 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
     try {
       await apiCall({ action: 'pass', roomId, playerId });
       await fetchState();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al pasar');
     } finally {
       setLoading(false);
     }
@@ -155,12 +152,10 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
       const data = await apiCall({ action: 'draw', roomId, playerId });
       await fetchState();
       if (data.forcedTileId) {
-        // The drawn tile is playable — need to play it
-        const drawnTile = state?.myHand.find((t) => t.id === data.forcedTileId);
-        // Will appear after refetch
+        // The drawn tile is playable — it will be highlighted after refetch
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al robar');
     } finally {
       setLoading(false);
     }
@@ -171,8 +166,8 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
     try {
       await apiCall({ action: 'next_hand', roomId, playerId });
       await fetchState();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error');
     } finally {
       setLoading(false);
     }
@@ -183,8 +178,8 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
     try {
       await apiCall({ action: 'rematch', roomId, playerId });
       await fetchState();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error');
     } finally {
       setLoading(false);
     }
@@ -204,7 +199,6 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
   }
 
   const activeSeats = state.seats.filter((s): s is string => s !== null);
-  const seatPlayers: (Player | null)[] = state.seats.map((sid) => sid ? playerMap[sid] || null : null);
 
   // Score display
   const renderScores = () => {
@@ -265,7 +259,7 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
             <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${isCurrent ? 'bg-amber-500/20 ring-1 ring-amber-400' : 'bg-emerald-900/40'}`}>
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${state.mode === '2v2' ? (team === 0 ? 'bg-emerald-600' : 'bg-amber-600') : 'bg-emerald-700'}`}>{i + 1}</span>
               <span className="text-sm font-medium">{p?.nickname || '...'}</span>
-              <span className="text-xs text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded">{state.handSizes[sid] || 0} fichas</span>
+              <span className="text-xs text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded">{(sid && state.handSizes[sid]) || 0} fichas</span>
               {p?.is_creator && <Crown className="w-3 h-3 text-amber-400" />}
             </div>
           );
@@ -287,7 +281,6 @@ export default function GameTable({ roomId, playerId, nickname, onLeave }: GameT
           ) : (
             <div className="flex flex-wrap justify-center gap-1 max-h-[40vh] overflow-y-auto">
               {state.chain.map((bt, i) => {
-                const isLast = i === state.chain.length - 1 || i === 0;
                 return (
                   <div key={`${bt.tileId}-${i}`} className="flex items-center">
                     <DominoTile a={bt.left} b={bt.right} size="sm" />
